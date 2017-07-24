@@ -202,7 +202,10 @@ class HlsGenerater
         }
 
         return [
-            'finalManifestFile' => $this->getOutputDirectory() . '/' . $this->getPrefix() . '_' . $quality . '_manifest.m3u8',
+            'finalManifestFile' => [
+                'path' => $this->getOutputDirectory() . '/' . $this->getPrefix() . '_hls_manifest.m3u8',
+                'name' => $this->getPrefix() . '_hls_manifest.m3u8',
+            ],
         ];
     }
 
