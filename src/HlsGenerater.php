@@ -2,9 +2,9 @@
 
 namespace MehrdadDadkhah\Video\HlsGenerater;
 
+use Emgag\Flysystem\Tempdir;
 use FFMpeg\FFProbe;
 use League\Flysystem\Plugin\ListFiles;
-use Emgag\Flysystem\Tempdir;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
@@ -32,7 +32,7 @@ class HlsGenerater
     /**
      * @var string
      */
-    private $urlPrefix = '';
+    private $uri = '';
 
     /**
      * @var string
@@ -93,6 +93,24 @@ class HlsGenerater
     }
 
     /**
+     * @param string $uri
+     */
+    public function setUri($uri)
+    {
+        $this->uri = $uri;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUri()
+    {
+        return $this->uri;
+    }
+
+    /**
      * @param string $source
      * @throws RuntimeException
      */
@@ -145,9 +163,9 @@ class HlsGenerater
         foreach ($qualities as $quality) {
             $bitrate          = $this->getRelatedBitrate($quality);
             $playListPath     = $this->getOutputDirectory() . '/' . $this->getPrefix() . '_' . $quality . '_manifest.m3u8';
-            $playListTempPath = $tempDir->getPath() . '/' . $this->getPrefix() . '_' . $quality . '_manifest.m3u8';
-
-            $cmd = sprintf($generateCommand,
+            $playListUri      = $this->getUri() . '/' . $this->getPrefix() . '_' . $quality . '_manifest.m3u8';
+            $playListTempPath = $tempDir->getPath() . $this->getPrefix() . '_' . $quality . '_manifest.m3u8';
+            $cmd              = sprintf($generateCommand,
                 $this->getSource(),
                 $quality,
                 $bitrate,
@@ -163,11 +181,11 @@ class HlsGenerater
             }
 
             $mainFileData .= $this->getHlsManifestData($bitrate);
-            $mainFileData .= $playListPath;
+            $mainFileData .= $playListUri . "\n";
         }
 
         $finalFile = fopen($tempDir->getPath() . '/' . $this->getPrefix() . '_hls_manifest.m3u8', "w") or die("Unable to open file!");
-        fwrite($finalFile, $data);
+        fwrite($finalFile, $mainFileData);
         fclose($finalFile);
 
         $moveCommand = sprintf(
@@ -175,8 +193,7 @@ class HlsGenerater
             $tempDir->getPath(),
             $this->getOutputDirectory()
         );
-
-        $proc = new Process();
+        $proc = new Process($moveCommand);
         $proc->setTimeout(null);
         $proc->run();
 
@@ -185,7 +202,7 @@ class HlsGenerater
         }
 
         return [
-            'finalManifestFile' => $finalFile,
+            'finalManifestFile' => $this->getOutputDirectory() . '/' . $this->getPrefix() . '_' . $quality . '_manifest.m3u8',
         ];
     }
 
@@ -196,8 +213,8 @@ class HlsGenerater
      */
     private function getGenerateM3u8Command()
     {
-        if($this->getConverter() == 'ffmpeg') {
-            return 'ffmpeg -y -ss %d -i %s -frames:v 1 -filter:v scale=%d:-1 %s/%04d.jpg';
+        if ($this->getConverter() == 'ffmpeg') {
+            return 'ffmpeg -i %s -profile:v baseline -level 3.0 -vf "scale=-2:%s" -b:v %sk -start_number 0 -hls_time 10 -hls_list_size 0 -f hls %s';
         }
 
         return '';
@@ -206,8 +223,9 @@ class HlsGenerater
     private function getVideoQualities()
     {
         // get basic info about video
-        $ffprobe     = FFProbe::create()->format($this->getSource());
-        $videoHeight = $ffprobe->get('height');
+        $videoHeight = FFProbe::create()->streams($this->getSource())->videos()
+            ->first()
+            ->get('height');
 
         $videoHeights = [
             144,
@@ -223,7 +241,7 @@ class HlsGenerater
         $heights = array_filter(
             $videoHeights,
             function ($value) use ($videoHeight) {
-                return ($value >= $videoHeight);
+                return ($value <= $videoHeight);
             }
         );
 
@@ -243,5 +261,41 @@ class HlsGenerater
         ];
 
         return $qualitiesBitrate[$quality];
+    }
+
+    private function getHlsManifestData($resolution)
+    {
+        $resolutionToBandwidth = [
+            480 => "BANDWIDTH=731352",
+            360 => "BANDWIDTH=615820",
+            240 => "BANDWIDTH=441362",
+            144 => "BANDWIDTH=231352",
+        ];
+
+        switch ($resolution) {
+            case $resolution >= 144 && $resolution < 240:
+                $bandwidth = $resolutionToBandwidth[144];
+                break;
+
+            case $resolution >= 240 && $resolution < 360:
+                $bandwidth = $resolutionToBandwidth[240];
+                break;
+
+            case $resolution >= 360 && $resolution < 480:
+                $bandwidth = $resolutionToBandwidth[360];
+                break;
+
+            default:
+                $bandwidth = $resolutionToBandwidth[480];
+                break;
+        }
+        // $data .= "#EXT-X-STREAM-INF:PROGRAM-ID=1, " . $bandwidth . ", RESOLUTION=" . floor($generatedQuality * 1.778) . "x" . $generatedQuality . "\n";
+
+        return sprintf(
+            "#EXT-X-STREAM-INF:PROGRAM-ID=1, %s, RESOLUTION=%sx%s\n",
+            $bandwidth,
+            floor($resolution * 1.778),
+            $resolution
+        );
     }
 }
