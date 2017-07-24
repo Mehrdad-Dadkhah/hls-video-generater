@@ -4,7 +4,7 @@ namespace MehrdadDadkhah\Video\HlsGenerater;
 
 use FFMpeg\FFProbe;
 use League\Flysystem\Plugin\ListFiles;
-use MehrdadDadkhah\Flysystem\Tempdir;
+use Emgag\Flysystem\Tempdir;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
@@ -196,7 +196,11 @@ class HlsGenerater
      */
     private function getGenerateM3u8Command()
     {
-        return 'ffmpeg -y -ss %d -i %s -frames:v 1 -filter:v scale=%d:-1 %s/%04d.jpg';
+        if($this->getConverter() == 'ffmpeg') {
+            return 'ffmpeg -y -ss %d -i %s -frames:v 1 -filter:v scale=%d:-1 %s/%04d.jpg';
+        }
+
+        return '';
     }
 
     private function getVideoQualities()
