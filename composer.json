@@ -1,0 +1,30 @@
+{
+    "name": "MehrdadDadkhah/HlsVideoGenerater",
+    "description": "PHP library for generating video m3u8 playlist",
+    "keywords": ["jwplayer", "hls", "m3u8", "live stream video", "video"],
+    "homepage": "https://github.com/Mehrdad-Dadkhah/HlsVideoGenerater",
+    "type": "library",
+    "require": {
+	    "php": ">=5.5",
+        "symfony/process": "^2.5",
+        "captioning/captioning": "^2.0",
+        "php-ffmpeg/php-ffmpeg": "^0.6",
+        "emgag/flysystem-tempdir": "^0.1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.6.*",
+	    "guzzlehttp/guzzle": "^5.0|^6.0"
+    },
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Mehrdad Dadkhah",
+            "email": "mehrdad@dadkhah.me"
+        }
+    ],
+    "autoload": {
+	    "psr-4": {
+		    "MehrdadDadkhah\\Video\\HlsGenerater\\": "src/"
+	    }
+    }
+}
