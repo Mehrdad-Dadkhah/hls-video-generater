@@ -1,6 +1,6 @@
 <?php
 
-use MehrdadDadkhah\Video\HlsGenerater\HlsGenerater;
+use MehrdadDadkhah\Video\HlsGenerater;
 use GuzzleHttp\Client;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;

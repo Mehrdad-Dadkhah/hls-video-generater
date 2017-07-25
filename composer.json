@@ -1,7 +1,7 @@
 {
     "name": "mehrdad-dadkhah/hls-video-generater",
     "description": "PHP library for generating video m3u8 playlist",
-    "keywords": ["jwplayer", "hls", "m3u8", "live stream video", "video"],
+    "keywords": ["video","hls", "m3u8", "live_stream_video", "stream", "jwplayer", "ffmpeg"],
     "homepage": "https://github.com/Mehrdad-Dadkhah/hls-video-generater",
     "type": "library",
     "require": {
@@ -24,7 +24,7 @@
     ],
     "autoload": {
 	    "psr-4": {
-		    "MehrdadDadkhah\\Video\\Hls\\": "src/"
+		    "MehrdadDadkhah\\Video\\": "src/"
 	    }
     }
 }

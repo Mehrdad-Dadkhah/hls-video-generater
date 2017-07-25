@@ -1,6 +1,6 @@
 <?php
 
-namespace MehrdadDadkhah\Video\HlsGenerater;
+namespace MehrdadDadkhah\Video;
 
 use Emgag\Flysystem\Tempdir;
 use FFMpeg\FFProbe;
