@@ -14,7 +14,7 @@ Tested with >=5.5, following binaries need to be installed
 ## Installation
 
 ```
-composer require MehrdadDadkhah/hls-video-generater
+composer require mehrdad-dadkhah/hls-video-generater
 ```
 
 ## Usage

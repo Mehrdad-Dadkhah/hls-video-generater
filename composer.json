@@ -1,5 +1,5 @@
 {
-    "name": "MehrdadDadkhah/hls-video-generater",
+    "name": "mehrdad-dadkhah/hls-video-generater",
     "description": "PHP library for generating video m3u8 playlist",
     "keywords": ["jwplayer", "hls", "m3u8", "live stream video", "video"],
     "homepage": "https://github.com/Mehrdad-Dadkhah/hls-video-generater",
