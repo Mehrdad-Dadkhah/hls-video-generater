@@ -24,7 +24,7 @@
     ],
     "autoload": {
 	    "psr-4": {
-		    "MehrdadDadkhah\\Video\\": "src/"
+		    "MehrdadDadkhah\\Video\\Hls\\": "src/"
 	    }
     }
 }
