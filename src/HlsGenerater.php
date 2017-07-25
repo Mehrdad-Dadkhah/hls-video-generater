@@ -40,6 +40,11 @@ class HlsGenerater
     private $converter = 'ffmpeg';
 
     /**
+     * @var boolean
+     */
+    private $generateDirectory = false;
+
+    /**
      * @return string
      */
     public function getConverter()
@@ -85,14 +90,6 @@ class HlsGenerater
     }
 
     /**
-     * @return string
-     */
-    public function getSource()
-    {
-        return $this->source;
-    }
-
-    /**
      * @param string $uri
      */
     public function setUri($uri)
@@ -126,6 +123,14 @@ class HlsGenerater
     }
 
     /**
+     * @return string
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
      * @return mixed
      */
     public function getOutputDirectory()
@@ -144,12 +149,34 @@ class HlsGenerater
     }
 
     /**
+     * @return mixed
+     */
+    public function generateDirectory()
+    {
+        return $this->generateDirectory;
+    }
+
+    /**
+     * @param mixed $generateDirectory
+     */
+    public function checkAndGenerateOutputDirectory()
+    {
+        $this->generateDirectory = true;
+
+        return $this;
+    }
+
+    /**
      * Generates m3u8
      *
-     * @throws \Exception
+     * @return array
      */
     public function generate()
     {
+        if ($this->generateDirectory()) {
+            $this->checkAndGenerateUploadFolder($this->getOutputDirectory());
+        }
+
         // create temporay directory
         $tempDir = new Tempdir('sprite');
         $tempDir->addPlugin(new ListFiles);
@@ -251,7 +278,7 @@ class HlsGenerater
         return $heights;
     }
 
-    private function getRelatedBitrate(int $quality)
+    private function getRelatedBitrate($quality)
     {
         $qualitiesBitrate = [
             1440 => 2500,
@@ -292,7 +319,6 @@ class HlsGenerater
                 $bandwidth = $resolutionToBandwidth[480];
                 break;
         }
-        // $data .= "#EXT-X-STREAM-INF:PROGRAM-ID=1, " . $bandwidth . ", RESOLUTION=" . floor($generatedQuality * 1.778) . "x" . $generatedQuality . "\n";
 
         return sprintf(
             "#EXT-X-STREAM-INF:PROGRAM-ID=1, %s, RESOLUTION=%sx%s\n",
@@ -300,5 +326,25 @@ class HlsGenerater
             floor($resolution * 1.778),
             $resolution
         );
+    }
+
+    private function checkAndGenerateUploadFolder($path)
+    {
+        if (!is_dir($path)) {
+            $dirWay = explode('/', $path);
+
+            $dir = '';
+            foreach ($dirWay as $step => $directory) {
+                if ($step > 0) {
+                    $dir .= '/' . $directory;
+
+                    if (!is_dir($dir)) {
+                        mkdir($dir, 0775);
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 }
