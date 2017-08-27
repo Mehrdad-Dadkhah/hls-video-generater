@@ -45,6 +45,16 @@ class HlsGenerater
     private $generateDirectory = false;
 
     /**
+     * @var int
+     */
+    private $permission = 0777;
+
+    /**
+     * @var string
+     */
+    private $filesOwner = 'root';
+
+    /**
      * @return string
      */
     public function getConverter()
@@ -167,6 +177,22 @@ class HlsGenerater
     }
 
     /**
+     * @param string $owner
+     * @param int $permission
+     */
+    public function setFilesOwnerAndPermission($owner, $permission)
+    {
+        if (strpos($owner, ':') === false) {
+            throw new RuntimeException(sprintf("invalid owner conf %s. it should with structure foo:boo", $owner));
+        }
+
+        $this->filesOwner = $owner;
+        $this->permission = $permission;
+
+        return $this;
+    }
+
+    /**
      * Generates m3u8
      *
      * @return array
@@ -226,6 +252,32 @@ class HlsGenerater
 
         if (!$proc->isSuccessful()) {
             throw new \RuntimeException($moveCommand . ": " . $proc->getErrorOutput());
+        }
+
+        $filesOwnerCommand = sprintf(
+            'chown -R %s %s/',
+            $this->filesOwner,
+            $this->getOutputDirectory()
+        );
+        $proc = new Process($filesOwnerCommand);
+        $proc->setTimeout(null);
+        $proc->run();
+
+        if (!$proc->isSuccessful()) {
+            throw new \RuntimeException($filesOwnerCommand . ": " . $proc->getErrorOutput());
+        }
+
+        $chmodCommand = sprintf(
+            'chmod -R %s %s/',
+            $this->permission,
+            $this->getOutputDirectory()
+        );
+        $proc = new Process($chmodCommand);
+        $proc->setTimeout(null);
+        $proc->run();
+
+        if (!$proc->isSuccessful()) {
+            throw new \RuntimeException($chmodCommand . ": " . $proc->getErrorOutput());
         }
 
         return [

@@ -28,6 +28,7 @@ $result = $hlsGenerater->setSource('path-to-video')
             ->checkAndGenerateOutputDirectory()
             ->setUri('/example/uri')
             ->setPrefix('sprite')
+            ->setFilesOwnerAndPermission('root:www-data', 775)
             ->generate();
 ```
 
