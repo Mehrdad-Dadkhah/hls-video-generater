@@ -4,10 +4,16 @@
     "keywords": ["video","hls", "m3u8", "live_stream_video", "stream", "jwplayer", "ffmpeg"],
     "homepage": "https://github.com/Mehrdad-Dadkhah/hls-video-generater",
     "type": "library",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/Mehrdad-Dadkhah/captioning"
+        }
+    ],
     "require": {
 	    "php": ">=5.5",
         "symfony/process": "^2.5",
-        "captioning/captioning": "^2.0",
+        "captioning/captioning": "dev-master",
         "php-ffmpeg/php-ffmpeg": "^0.6",
         "emgag/flysystem-tempdir": "^0.1.0"
     },
